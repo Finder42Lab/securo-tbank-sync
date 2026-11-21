@@ -82,7 +82,6 @@ class InvestClient:
             "Authorization": f"Bearer {self._token}",
             "Content-Type": "application/json",
             "Accept": "application/json",
-            "x-app-name": APP_NAME,
         }
         try:
             status, raw = self._http(
@@ -98,7 +97,7 @@ class InvestClient:
         if status == 429 or status >= 500:
             raise ApiTransient(f"T-Bank API is temporarily unavailable (HTTP {status}).")
         if status != 200:
-            raise ApiTransient(f"T-Bank API returned HTTP {status}.")
+            raise ApiTransient(f"T-Bank API returned HTTP {service} {method} {status}.")
         try:
             result = json.loads(raw)
         except (UnicodeDecodeError, json.JSONDecodeError):
