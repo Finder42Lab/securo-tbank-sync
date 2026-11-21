@@ -107,7 +107,7 @@ class InvestClient:
         return result
 
     def accounts(self) -> list[dict[str, Any]]:
-        response = self._call("UsersService", "GetAccounts", {})
+        response = self._call("UsersService", "GetAccounts", {"status": "ACCOUNT_STATUS_OPEN"})
         accounts = response.get("accounts") or []
         if not isinstance(accounts, list):
             raise ApiTransient("T-Bank API returned an invalid account list.")
@@ -115,8 +115,8 @@ class InvestClient:
             account
             for account in accounts
             if isinstance(account, dict)
-            and account.get("status") in (None, "ACCOUNT_STATUS_OPEN")
             and account.get("accessLevel") not in ("ACCOUNT_ACCESS_LEVEL_NO_ACCESS",)
+            and account.get("type") in ("ACCOUNT_TYPE_TINKOFF", "ACCOUNT_TYPE_TINKOFF_IIS")
         ]
 
     def positions(self, account_id: str) -> dict[str, Any]:
