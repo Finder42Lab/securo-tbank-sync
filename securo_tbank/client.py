@@ -1,5 +1,6 @@
 """Minimal standard-library client for T-Bank Invest REST API."""
 from __future__ import annotations
+from ssl import SSLContext
 import ssl
 
 import json
@@ -15,13 +16,13 @@ MAX_RESPONSE_BYTES = 20 * 1024 * 1024
 HTTP_TIMEOUT = 30
 APP_NAME = "securo-tbank"
 
-Http = Callable[[str, dict[str, str], bytes], tuple[int, bytes]]
+Http = Callable[[str, dict[str, str], bytes, SSLContext], tuple[int, bytes]]
 
 
-def urllib_post(url: str, headers: dict[str, str], body: bytes) -> tuple[int, bytes]:
+def urllib_post(url: str, headers: dict[str, str], body: bytes, ssl_context: SSLContext) -> tuple[int, bytes]:
     request = urllib.request.Request(url, data=body, headers=headers, method="POST")
     try:
-        with urllib.request.urlopen(request, timeout=HTTP_TIMEOUT) as response:
+        with urllib.request.urlopen(request, timeout=HTTP_TIMEOUT, context=ssl_context) as response:
             payload = response.read(MAX_RESPONSE_BYTES + 1)
             status = response.status
     except urllib.error.HTTPError as exc:
@@ -39,9 +40,9 @@ class InvestClient:
         self._token = token
         self._http = http
 
-        context = ssl.create_default_context()
+        self.context = ssl.create_default_context()
 
-        context.load_cert_chain(
+        self.context.load_cert_chain(
             certfile="Russian_Trusted_Root_CA.cer",
         )
 
@@ -58,6 +59,7 @@ class InvestClient:
                 url,
                 headers,
                 json.dumps(payload, separators=(",", ":")).encode(),
+                self.context
             )
         except OSError as exc:
             raise ApiTransient(f"Could not reach T-Bank API ({type(exc).__name__}).") from None
