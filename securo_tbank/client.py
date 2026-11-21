@@ -74,11 +74,7 @@ class InvestClient:
         self._token = token
         self._http = http
 
-        self.context = ssl.create_default_context()
-
-        self.context.load_cert_chain(
-            certfile=CERT,
-        )
+        self.context = ssl.create_default_context(cadata=CERT)
 
     def _call(self, service: str, method: str, payload: dict[str, Any]) -> dict[str, Any]:
         url = f"{API_BASE}/tinkoff.public.invest.api.contract.v1.{service}/{method}"
