@@ -1,5 +1,6 @@
 """Minimal standard-library client for T-Bank Invest REST API."""
 from __future__ import annotations
+import ssl
 
 import json
 import urllib.error
@@ -37,6 +38,12 @@ class InvestClient:
     def __init__(self, token: str, *, http: Http = urllib_post) -> None:
         self._token = token
         self._http = http
+
+        context = ssl.create_default_context()
+
+        context.load_cert_chain(
+            certfile="Russian_Trusted_Root_CA.cer",
+        )
 
     def _call(self, service: str, method: str, payload: dict[str, Any]) -> dict[str, Any]:
         url = f"{API_BASE}/tinkoff.public.invest.api.contract.v1.{service}/{method}"
