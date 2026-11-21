@@ -43,7 +43,7 @@ class InvestClient:
         self.context = ssl.create_default_context()
 
         self.context.load_cert_chain(
-            certfile="Russian_Trusted_Root_CA.cer",
+            certfile="securo_tbank/Russian_Trusted_Root_CA.cer",
         )
 
     def _call(self, service: str, method: str, payload: dict[str, Any]) -> dict[str, Any]:
